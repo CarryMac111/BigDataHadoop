@@ -7,6 +7,7 @@
 - [ ] 结构化数据的分隔符在Hive数据表中如何设置？
 - [ ] 灵活性高：自定义用户函数（UDF）和存储格式？(自定义存储格式是什么意思)
 - [ ] 统一的元数据管理：可与presto   /     impala     /    sparksql    **共享元数据**，元数据（metastore ）的含义？
+- [ ] 隐式转换需要理解去记忆
 
 
 
@@ -139,6 +140,81 @@ Transaction isolation: TRANSACTION_REPEATABLE_READ
 0: jdbc:hive2://node1:10000> 
 0: jdbc:hive2://node1:10000> 
 ```
+
+
+
+
+
+### 2.3Metastore 元数据
+
+在Hive中，表名称、表结构、字段名、字段类型、表的分隔符统一称为元数据。所有的元数据（mateStore）
+
+
+
+
+
+### 2.4HSQL的执行过程
+
+
+
+
+
+
+
+## 三、Hive的数据类型
+
+### 3.1基本数据类型
+
+| 数据类型   大类                         | 类型                                                         |
+| --------------------------------------- | ------------------------------------------------------------ |
+| Integers（**整型**）                    | TINYINT（tinyint）1字节的**有符号整数**<br />SMALLINT（smallint）2字节的有符号整数<br />INT（int） 4个字节的有符号整数 |
+| Boolean（**布尔类型**）                 | BOOLEAN——TRUE、FALSE**真值**                                 |
+| Floating Point Numbers（**浮点型**）    | FLOAT单精度浮点数，DOUBLE双精度浮点数                        |
+| Fixed point numbers（**定点数**）       | DECIMAL（decimal）用户自己定义的精度定点数，如：     DECIMAL(7,2) |
+| String types（**字符串**）              | STRING指定字符集的字符序列<br />VARCHAR具有最大**长度**的字符序列<br />CHAR**固定长度**的字符序列 |
+| Data abd time types（日期**时间**类型） | TIMESTAMP**时间戳**<br />TIMESTAMP WITH LOCAL TIME ZONE时间戳，纳秒精度<br />DATE日期类型 |
+| Binary types（**二进制**类型）          | BINARY字节序列                                               |
+
+### 3.2复杂类型（类似对象数据类型）
+
+ 
+
+| 类型             | 描述                                                         | 示例                                                         |
+| ---------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| STRUCT结构体     | 字段的集合，类似与对象[小明(12岁，男，小学生)]，<br />字段的类型可以不同，可以使用`名称.字段名`方式进行访问 | `STRUCT('李明',12,'小学生','2023-4-8')`                      |
+| MAP              | 键值对的集合，使用`名称[key]`的方式访问对应的VALUE           | `map('a',1,'b',2)`<br />name=a的值为1，<br />name=b的值为2   |
+| ARRAY(array)数组 | 数组是一组具有相同数据类型和名称的变量组，<br />用名称加索引访问对应的VALUE：`名称[index]` | `ARRAY(11290,1243124,345,242,3432)`<br />`ARRAY('jone','live','valueFda','data')` |
+
+### 3.3隐式转换
+
+Hive 中基本数据类型遵循以下的层次结构，按照这个层次结构，子类型到祖先类型允许隐式转换。例如 INT 类型的数据允许隐式转换为 BIGINT 类型。额外注意的是：按照类型层次结构允许将 STRING 类型隐式转换为 DOUBLE 类型。
+
+![img](https://camo.githubusercontent.com/2b9ac2eccdbb05b9ff8635126e77cc5c9cdf683658ef7bc340f22be75a69f57c/68747470733a2f2f67697465652e636f6d2f68656962616979696e672f426967446174612d4e6f7465732f7261772f6d61737465722f70696374757265732f686976652d646174612d747970652e706e67)
+
+### 3.4示例
+
+```sql
+CREATE TABLE students(
+  name      STRING,   -- 姓名
+  age       INT,      -- 年龄
+  subject   ARRAY<STRING>,   --学科
+  score     MAP<STRING,FLOAT>,  --各个学科考试成绩
+  address   STRUCT<houseNumber:int, street:STRING, city:STRING, province：STRING>  --家庭居住地址
+) ROW FORMAT DELIMITED FIELDS TERMINATED BY "\t";
+
+-- 其中文件分隔符是： "\t"制表符
+
+```
+
+## 四、文件分割符的设置
+
+
+
+
+
+
+
+
 
 
 
